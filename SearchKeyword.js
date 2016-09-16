@@ -10,7 +10,7 @@ setInterval(searchFor, 1000*60*60);
 searchFor('ptsd -rt');
 
 function searchFor(query) {
-  T.get('search/tweets', { q: query, count: 100}, function(err, data, response) {
+  T.get('search/tweets', { q: query, count: 100, lang: 'en'}, function(err, data, response) {
     var obj = JSON.stringify(data);
     var obj2 = JSON.parse(obj);
 
