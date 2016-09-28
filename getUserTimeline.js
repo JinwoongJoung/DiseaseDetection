@@ -17,8 +17,9 @@ var connection = mysql.createConnection({
 
 connection.connect();
 
+/*
 // mysql query to select name from 'screenName' table
-var query = connection.query('select name from screenName', function(err,result){
+var query = connection.query('select name, tweetId from screenName', function(err,result){
   if (err) {
     console.error(err);
     return;
@@ -26,28 +27,54 @@ var query = connection.query('select name from screenName', function(err,result)
   // change the result into json format
   var obj = JSON.stringify(result);
   var obj2 = JSON.parse(obj);
-  for (i = 0; i < 10; i++){
-    var name = obj2[i].name.toString();
-    getTimeline(name);
+  var nameList = new Array(100);
+  var tweetIds = new Array(100);
+  for (i = 0; i < 100; i++){
+    var name = obj2[i].name;
+    var id = obj2[i].tweetId;
+    nameList[i] = name;
+    tweetIds[i] = id;
+  }
+  for (var x = 0, ln = nameList.length; x < ln; x++){
+    setInterval(function(y){
+      if (nameList[y] != "ptsd_artist"){
+        getTimeline(nameList[y], tweetIds[y]);
+      }
+    },x * 1000 * 60 * 5, x);
   }
 });
+*/
 
-// test run
-//getTimeline('blasianFMA');
-
-//Get User Timeline by the screen name
-function getTimeline(name){
-  T.get('statuses/user_timeline', { screen_name: name, count: 200}, function(err, data, response) {
+/*
+function getFirstTweetTime(name, maxId){
+  T.get('statuses/user_timeline', {screen_name: name, max_id: maxId}, function(err, data, response) {
     var obj = JSON.stringify(data);
     var obj2 = JSON.parse(obj);
+    var firstTweetTime = new Date(Date.parse(obj2[0].created_at.replace(/( \+)/, ' UTC$1')));
+    console.log(firstTweetTime);
+  })
+}
+getFirstTweetTime('twatterfull', 780864912386035712);
+*/
 
-    for (i = 0; i < 200; i++) {
+getTimeline('RServiceDogCoach', 780924028273950720);
+
+//Get User Timeline by the screen name
+function getTimeline(name, maxId){
+  T.get('statuses/user_timeline', {screen_name: name, max_id: maxId}, function(err, data, response) {
+    var obj = JSON.stringify(data);
+    var obj2 = JSON.parse(obj);
+    //var firstTweetTime = new Date(Date.parse(obj2[0].created_at.replace(/( \+)/, ' UTC$1')));
+    var currentTime = new Date();
+
+    for (i = 0; i < obj2.length; i++) {
       // store the results into timeLine table in mysql
+      var parsedDate = new Date(Date.parse(obj2[i].created_at.replace(/( \+)/, ' UTC$1')));
       var timeLine = {
         screenName: name,
         tweetId: obj2[i].id_str,
         tweets: obj2[i].text,
-        date: obj2[i].created_at
+        date: parsedDate
       };
       // insert query for mysql database
       var query = connection.query('insert into timeLine set ?', timeLine, function(err, result){
@@ -57,6 +84,12 @@ function getTimeline(name){
         }
         console.error(result);
       });
+      var lastTweetTime = new Date(Date.parse(obj2[obj2.length - 1].created_at.replace(/( \+)/, ' UTC$1')));
+      var lastTweetId = obj2[obj2.length - 1].id_str;
+    }
+
+    if ((currentTime - lastTweetTime) < (1000 * 60 * 60 * 24 * 90)){
+      getTimeline(name, lastTweetId);
     }
   })
 }
