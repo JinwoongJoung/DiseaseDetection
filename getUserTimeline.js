@@ -17,9 +17,8 @@ var connection = mysql.createConnection({
 
 connection.connect();
 
-/*
 // mysql query to select name from 'screenName' table
-var query = connection.query('select name, tweetId from screenName', function(err,result){
+var query = connection.query('SELECT name, tweetId FROM screenName', function(err,result){
   if (err) {
     console.error(err);
     return;
@@ -33,17 +32,15 @@ var query = connection.query('select name, tweetId from screenName', function(er
     var name = obj2[i].name;
     var id = obj2[i].tweetId;
     nameList[i] = name;
-    tweetIds[i] = id;
+    tweetIds[i] = Number(id);
   }
-  for (var x = 0, ln = nameList.length; x < ln; x++){
-    setInterval(function(y){
-      if (nameList[y] != "ptsd_artist"){
-        getTimeline(nameList[y], tweetIds[y]);
-      }
-    },x * 1000 * 60 * 5, x);
+
+  for (var x = 0, ln = nameList.length; x < ln; x++) {
+    setTimeout(function(y) {
+      getTimeline(nameList[y], tweetIds[y], 0);
+    }, x * 1000 * 60, x); // recall the function every 1 min 
   }
 });
-*/
 
 /*
 function getFirstTweetTime(name, maxId){
@@ -57,17 +54,16 @@ function getFirstTweetTime(name, maxId){
 getFirstTweetTime('twatterfull', 780864912386035712);
 */
 
-getTimeline('RServiceDogCoach', 780924028273950720);
-
 //Get User Timeline by the screen name
-function getTimeline(name, maxId){
-  T.get('statuses/user_timeline', {screen_name: name, max_id: maxId}, function(err, data, response) {
+function getTimeline(name, maxId, count){
+  T.get('statuses/user_timeline', {screen_name: name, max_id: maxId, count: 200}, function(err, data, response) {
     var obj = JSON.stringify(data);
     var obj2 = JSON.parse(obj);
     //var firstTweetTime = new Date(Date.parse(obj2[0].created_at.replace(/( \+)/, ' UTC$1')));
     var currentTime = new Date();
 
     for (i = 0; i < obj2.length; i++) {
+      count++;
       // store the results into timeLine table in mysql
       var parsedDate = new Date(Date.parse(obj2[i].created_at.replace(/( \+)/, ' UTC$1')));
       var timeLine = {
@@ -84,12 +80,13 @@ function getTimeline(name, maxId){
         }
         console.error(result);
       });
+      // get the last(not the lastest) tweet time and id
       var lastTweetTime = new Date(Date.parse(obj2[obj2.length - 1].created_at.replace(/( \+)/, ' UTC$1')));
       var lastTweetId = obj2[obj2.length - 1].id_str;
     }
-
-    if ((currentTime - lastTweetTime) < (1000 * 60 * 60 * 24 * 90)){
-      getTimeline(name, lastTweetId);
+    // calling the function again if the user's number of tweets is less than 1000 and time of the last tweet is in 60 days.
+    if((currentTime - lastTweetTime) < (1000 * 60 * 60 * 24 * 60) && count <= 2000){
+      getTimeline(name, lastTweetId, count);
     }
   })
 }
