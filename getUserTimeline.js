@@ -38,7 +38,7 @@ var query = connection.query('SELECT name, tweetId FROM screenName', function(er
   for (var x = 0, ln = nameList.length; x < ln; x++) {
     setTimeout(function(y) {
       getTimeline(nameList[y], tweetIds[y], 0);
-    }, x * 1000 * 60, x); // recall the function every 1 min 
+    }, x * 1000 * 60, x); // recall the function every 1 min
   }
 });
 
@@ -84,7 +84,7 @@ function getTimeline(name, maxId, count){
       var lastTweetTime = new Date(Date.parse(obj2[obj2.length - 1].created_at.replace(/( \+)/, ' UTC$1')));
       var lastTweetId = obj2[obj2.length - 1].id_str;
     }
-    // calling the function again if the user's number of tweets is less than 1000 and time of the last tweet is in 60 days.
+    // calling the function again if the user's number of tweets is less than 2000 and time of the last tweet is in 60 days.
     if((currentTime - lastTweetTime) < (1000 * 60 * 60 * 24 * 60) && count <= 2000){
       getTimeline(name, lastTweetId, count);
     }
