@@ -22,7 +22,7 @@ connection.connect();
 setInterval(searchFor, 1000*60*60);
 */
 
-searchFor('ptsd I OR we OR me OR us OR my OR mine OR our OR ours -rt');
+searchFor('ptsd I OR we OR me OR us OR my OR mine OR our OR ours -rt -filter:links');
 
 function searchFor(keyword) {
   // Twitter API method
