@@ -1,4 +1,4 @@
-console.log('The follow bot is starting');
+console.log('The twitter bot is starting');
 
 var Twit = require('twit');
 
@@ -6,31 +6,17 @@ var config = require('./config');
 var T = new Twit(config);
 
 // Setting up a user stream
-var stream = T.stream('user');
+var stream = T.stream('statuses/filter', {track: 'ptsd I,ptsd we,ptsd me,ptsd us,ptsd my,ptsd mine,ptsd our,ptsd ours', language: 'en'});
 
 // Anytime someone follows me
-stream.on('follow', followed);
+stream.on('tweet', tweetEvent);
 
-function followed(eventMsg) {
-  console.log("Follow event!");
-  var name = eventMsg.source.name;
-  var screenName = eventMsg.source.screen_name;
-  tweetIt('Hi, @' + screenName + ' Thank you');
-}
+function tweetEvent(eventMsg) {
+  var tweetId = eventMsg.id_str;
+  var createdAt = eventMsg.created_at;
+  var text = eventMsg.text;
+  var user = eventMsg.user.screen_name;
 
-function tweetIt(txt) {
-
-	var tweet = {
-	  status: txt
-	}
-
-	T.post('statuses/update', tweet, tweeted);
-
-	function tweeted(err, data, response) {
-	  if (err) {
-	  	console.log("Something went wwrong!");
-	  } else {
-	    console.log("It worked!");
-	  }
-	}
+  var result = tweetId + " " + user + ": " + text + "(" + createdAt + ")"
+  console.log(result);
 }
