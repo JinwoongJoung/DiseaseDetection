@@ -15,11 +15,11 @@ public static void main(String[] args) throws IOException {
 			Statement myStmt = myConn.createStatement();
 
 			// 3. Execute SQL query
-			ResultSet myRs = myStmt.executeQuery("select * from TweetStream");
+			ResultSet myRs = myStmt.executeQuery("select * from tweets");
 
 			// 4. Process the result set
 			while (myRs.next()) {
-				pw.println(myRs.getString("text"));
+				pw.println(myRs.getString("tweetId") + ": " + myRs.getString("tweet"));
 			}
 
 			pw.close();
