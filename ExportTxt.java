@@ -19,7 +19,7 @@ public static void main(String[] args) throws IOException {
 
 			// 4. Process the result set
 			while (myRs.next()) {
-				pw.println(myRs.getString("tweetId") + ": " + myRs.getString("tweet"));
+				pw.println(myRs.getString("tweetId") + "	" + myRs.getString("tweet") + "	");
 			}
 
 			pw.close();
